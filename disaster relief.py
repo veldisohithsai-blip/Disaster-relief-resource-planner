@@ -1,375 +1,262 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Disaster Relief Resource Planner</title>
+class DisasterReliefPlanner:
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
+    def __init__(self):
+        self.resources = {}
+        self.allocations = []
+
+    # CO1 - State Space Representation
+    def add_resource(self):
+        name = input("Enter Resource Name: ")
+        quantity = int(input("Enter Quantity: "))
+        unit = input("Enter Unit: ")
+
+        self.resources[name] = {
+            "quantity": quantity,
+            "unit": unit
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px gray;
+        print("Resource Added Successfully!")
+
+    def view_resources(self):
+        print("\nAVAILABLE RESOURCES")
+        print("-----------------------")
+
+        if not self.resources:
+            print("No Resources Available")
+            return
+
+        for name, details in self.resources.items():
+            print(
+                f"{name} : {details['quantity']} {details['unit']}"
+            )
+
+    # CO3 - CSP Resource Allocation
+    def allocate_resource(self):
+
+        area = input("Enter Area Name: ")
+        resource = input("Enter Resource Name: ")
+
+        if resource not in self.resources:
+            print("Resource Not Found!")
+            return
+
+        qty = int(input("Enter Quantity To Allocate: "))
+
+        available = self.resources[resource]["quantity"]
+
+        if qty > available:
+            print("Constraint Failed!")
+            print("Insufficient Resources")
+            return
+
+        self.resources[resource]["quantity"] -= qty
+
+        self.allocations.append({
+            "area": area,
+            "resource": resource,
+            "quantity": qty
+        })
+
+        print("Allocation Successful!")
+
+    def view_allocations(self):
+
+        print("\nALLOCATION HISTORY")
+        print("----------------------")
+
+        if not self.allocations:
+            print("No Allocations Found")
+            return
+
+        for a in self.allocations:
+            print(
+                f"Area: {a['area']} | "
+                f"Resource: {a['resource']} | "
+                f"Quantity: {a['quantity']}"
+            )
+
+    # CO2 - BFS Search
+    def bfs_route(self):
+
+        graph = {
+            "Warehouse": ["Chennai", "Hyderabad"],
+            "Chennai": ["Vijayawada"],
+            "Hyderabad": ["Warangal"],
+            "Vijayawada": [],
+            "Warangal": []
+            
         }
 
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        .section {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        #output {
-            margin-top: 20px;
-            padding: 15px;
-            background: #eef2f7;
-            border-radius: 5px;
-            white-space: pre-line;
-        }
-    </style>
-</head>
-
-<body>
+        start = input("Enter Start Location: ")
+        goal = input("Enter Goal Location: ")
 
-<div class="container">
-
-    <h1>Disaster Relief Resource Planner</h1>
+        visited = set()
+        queue = [[start]]
 
-    <!-- Add Resource -->
-    <div class="section">
-        <h3>Add Resource</h3>
+        while queue:
 
-        <input type="text" id="resourceName" placeholder="Resource Name">
-        <input type="number" id="resourceQty" placeholder="Quantity">
-        <input type="text" id="resourceUnit" placeholder="Unit">
+            path = queue.pop(0)
 
-        <button onclick="addResource()">Add Resource</button>
-    </div>
+            node = path[-1]
 
-    <!-- View Resources -->
-    <div class="section">
-        <h3>Resources</h3>
-        <button onclick="viewResources()">View Resources</button>
-    </div>
+            if node == goal:
+                print("Best Route Found:")
+                print(" -> ".join(path))
+                return
 
-    <!-- Allocate Resource -->
-    <div class="section">
-        <h3>Allocate Resource</h3>
+            if node not in visited:
 
-        <input type="text" id="areaName" placeholder="Area Name">
-        <input type="text" id="allocResource" placeholder="Resource Name">
-        <input type="number" id="allocQty" placeholder="Quantity">
+                visited.add(node)
 
-        <button onclick="allocateResource()">Allocate Resource</button>
-    </div>
+                for neighbour in graph.get(node, []):
 
-    <!-- Allocation History -->
-    <div class="section">
-        <h3>Allocation History</h3>
-        <button onclick="viewAllocations()">View History</button>
-    </div>
+                    new_path = list(path)
 
-    <!-- BFS Route Search -->
-    <div class="section">
-        <h3>BFS Route Search</h3>
+                    new_path.append(neighbour)
 
-        <input type="text" id="startLocation" placeholder="Start Location">
-        <input type="text" id="goalLocation" placeholder="Goal Location">
+                    queue.append(new_path)
 
-        <button onclick="bfsRoute()">Find Route</button>
-    </div>
+        print("No Route Found")
 
-    <!-- Decision Agent -->
-    <div class="section">
-        <h3>Decision Agent</h3>
+    # CO4 - Intelligent Agent
+    def decision_agent(self):
 
-        <input type="number" id="severity" placeholder="Severity Level (1-10)">
+        severity = int(
+            input("Enter Severity Level (1-10): ")
+        )
 
-        <button onclick="decisionAgent()">Analyze</button>
-    </div>
+        print("\nDecision Agent Output")
 
-    <!-- Shortage Prediction -->
-    <div class="section">
-        <h3>Shortage Prediction</h3>
+        if severity >= 8:
+            print("High Severity")
+            print("Action: Send Maximum Resources")
 
-        <input type="number" id="disasters" placeholder="Past Disasters">
-        <input type="number" id="shortages" placeholder="Resource Shortages">
+        elif severity >= 5:
+            print("Medium Severity")
+            print("Action: Send Moderate Resources")
 
-        <button onclick="shortagePrediction()">Predict</button>
-    </div>
+        else:
+            print("Low Severity")
+            print("Action: Monitor Situation")
 
-    <!-- Explainable Reasoning -->
-    <div class="section">
-        <h3>Explainable Reasoning</h3>
+    # CO5 - Bayesian Prediction
+    def shortage_prediction(self):
 
-        <input type="text" id="reasonArea" placeholder="Area">
-        <input type="number" id="reasonSeverity" placeholder="Severity">
+        disasters = int(
+            input("Total Past Disasters: ")
+        )
 
-        <button onclick="reasoningTrace()">Generate Trace</button>
-    </div>
+        shortages = int(
+            input("Number Of Resource Shortages: ")
+        )
 
-    <div id="output">
-        Output will appear here...
-    </div>
+        probability = shortages / disasters
 
-</div>
+        print(
+            "\nProbability Of Resource Shortage:",
+            round(probability, 2)
+        )
 
-<script>
+    # CO6 - Explainable Reasoning
+    def reasoning_trace(self):
 
-let resources = {};
-let allocations = [];
+        area = input("Enter Area: ")
+        severity = int(
+            input("Enter Severity Level: ")
+        )
 
-function showOutput(text) {
-    document.getElementById("output").innerText = text;
-}
+        print("\nEXPLAINABLE AI TRACE")
+        print("----------------------")
 
-function addResource() {
+        print("Area:", area)
+        print("Severity:", severity)
 
-    let name = document.getElementById("resourceName").value;
-    let qty = parseInt(document.getElementById("resourceQty").value);
-    let unit = document.getElementById("resourceUnit").value;
+        if severity >= 8:
 
-    resources[name] = {
-        quantity: qty,
-        unit: unit
-    };
+            print(
+                "Rule Applied -> High Severity Rule"
+            )
 
-    showOutput("Resource Added Successfully!");
-}
+            print(
+                "Decision -> Allocate Maximum Resources"
+            )
 
-function viewResources() {
+        elif severity >= 5:
 
-    let output = "AVAILABLE RESOURCES\n\n";
+            print(
+                "Rule Applied -> Medium Severity Rule"
+            )
 
-    if (Object.keys(resources).length === 0) {
-        output += "No Resources Available";
-    }
-    else {
+            print(
+                "Decision -> Allocate Moderate Resources"
+            )
 
-        for (let name in resources) {
-            output +=
-                `${name} : ${resources[name].quantity} ${resources[name].unit}\n`;
-        }
-    }
+        else:
 
-    showOutput(output);
-}
+            print(
+                "Rule Applied -> Low Severity Rule"
+            )
 
-function allocateResource() {
+            print(
+                "Decision -> Monitor Situation"
+            )
 
-    let area =
-        document.getElementById("areaName").value;
 
-    let resource =
-        document.getElementById("allocResource").value;
+def main():
 
-    let qty =
-        parseInt(document.getElementById("allocQty").value);
+    planner = DisasterReliefPlanner()
 
-    if (!resources[resource]) {
-        showOutput("Resource Not Found!");
-        return;
-    }
+    while True:
 
-    let available = resources[resource].quantity;
+        print("\n===================================")
+        print(" DISASTER RELIEF RESOURCE PLANNER ")
+        print("===================================")
 
-    if (qty > available) {
-        showOutput(
-            "Constraint Failed!\nInsufficient Resources"
-        );
-        return;
-    }
+        print("1. Add Resource")
+        print("2. View Resources")
+        print("3. Allocate Resource")
+        print("4. View Allocation History")
+        print("5. BFS Route Search")
+        print("6. Decision Agent")
+        print("7. Shortage Prediction")
+        print("8. Explainable Reasoning")
+        print("9. Exit")
 
-    resources[resource].quantity -= qty;
+        choice = input("\nEnter Choice: ")
 
-    allocations.push({
-        area,
-        resource,
-        quantity: qty
-    });
+        if choice == "1":
+            planner.add_resource()
 
-    showOutput("Allocation Successful!");
-}
+        elif choice == "2":
+            planner.view_resources()
 
-function viewAllocations() {
+        elif choice == "3":
+            planner.allocate_resource()
 
-    let output = "ALLOCATION HISTORY\n\n";
+        elif choice == "4":
+            planner.view_allocations()
 
-    if (allocations.length === 0) {
-        output += "No Allocations Found";
-    }
-    else {
+        elif choice == "5":
+            planner.bfs_route()
 
-        allocations.forEach(a => {
-            output +=
-            `Area: ${a.area} | Resource: ${a.resource} | Quantity: ${a.quantity}\n`;
-        });
-    }
+        elif choice == "6":
+            planner.decision_agent()
 
-    showOutput(output);
-}
+        elif choice == "7":
+            planner.shortage_prediction()
 
-function bfsRoute() {
+        elif choice == "8":
+            planner.reasoning_trace()
 
-    let graph = {
-        Warehouse: ["Chennai", "Hyderabad"],
-        Chennai: ["Vijayawada"],
-        Hyderabad: ["Warangal"],
-        Vijayawada: [],
-        Warangal: []
-    };
+        elif choice == "9":
+            print(
+                "\nThank You For Using Disaster Relief Resource Planner"
+            )
+            break
 
-    let start =
-        document.getElementById("startLocation").value;
+        else:
+            print("Invalid Choice!")
 
-    let goal =
-        document.getElementById("goalLocation").value;
 
-    let visited = [];
-    let queue = [[start]];
-
-    while (queue.length > 0) {
-
-        let path = queue.shift();
-        let node = path[path.length - 1];
-
-        if (node === goal) {
-            showOutput(
-                "Best Route Found:\n" +
-                path.join(" ➜ ")
-            );
-            return;
-        }
-
-        if (!visited.includes(node)) {
-
-            visited.push(node);
-
-            (graph[node] || []).forEach(neighbour => {
-
-                let newPath = [...path, neighbour];
-
-                queue.push(newPath);
-            });
-        }
-    }
-
-    showOutput("No Route Found");
-}
-
-function decisionAgent() {
-
-    let severity =
-        parseInt(document.getElementById("severity").value);
-
-    let output = "";
-
-    if (severity >= 8) {
-
-        output =
-        "High Severity\nAction: Send Maximum Resources";
-
-    } else if (severity >= 5) {
-
-        output =
-        "Medium Severity\nAction: Send Moderate Resources";
-
-    } else {
-
-        output =
-        "Low Severity\nAction: Monitor Situation";
-    }
-
-    showOutput(output);
-}
-
-function shortagePrediction() {
-
-    let disasters =
-        parseInt(document.getElementById("disasters").value);
-
-    let shortages =
-        parseInt(document.getElementById("shortages").value);
-
-    let probability = shortages / disasters;
-
-    showOutput(
-        "Probability Of Resource Shortage: " +
-        probability.toFixed(2)
-    );
-}
-
-function reasoningTrace() {
-
-    let area =
-        document.getElementById("reasonArea").value;
-
-    let severity =
-        parseInt(document.getElementById("reasonSeverity").value);
-
-    let output =
-        "EXPLAINABLE AI TRACE\n\n" +
-        "Area: " + area + "\n" +
-        "Severity: " + severity + "\n\n";
-
-    if (severity >= 8) {
-
-        output +=
-        "Rule Applied → High Severity Rule\n" +
-        "Decision → Allocate Maximum Resources";
-
-    }
-    else if (severity >= 5) {
-
-        output +=
-        "Rule Applied → Medium Severity Rule\n" +
-        "Decision → Allocate Moderate Resources";
-
-    }
-    else {
-
-        output +=
-        "Rule Applied → Low Severity Rule\n" +
-        "Decision → Monitor Situation";
-    }
-
-    showOutput(output);
-}
-
-</script>
-
-</body>
-</html>
+if __name__ == "__main__":
+    main()
